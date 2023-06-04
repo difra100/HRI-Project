@@ -1,8 +1,10 @@
 {
     "Book of Short Stories": -90,
+    "Guitar": -80,
     "Glass of water": -60,
     "Pencil": -30,
     "Computer": 30,
     "Hat": 60,
+    "Gun": 80,
     "Glasses": 90
 }

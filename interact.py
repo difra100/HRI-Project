@@ -57,7 +57,9 @@ def naoqiAPI():
                 'pen': 'images/pen.webp',
                 'book': 'images/book.jpg',
                 'flask': 'images/flask.jpg',
-                'glasses': 'images/glasses.webp'}
+                'glasses': 'images/glasses.webp',
+                'guitar': 'images/guitar.jpeg',
+                'bass': 'images/bass.jpeg'}
     img_list = list(word2img.keys())
 
     improve_image_msg = " please try to improve room lighting and put the object closer to the camera,"
@@ -74,7 +76,7 @@ def naoqiAPI():
     for choice in img_list:
         print("choice", choice)
         tts_service.say(
-            "So you have chosen {}".format(choice))
+            "You are now showing the image of a {}".format(choice))
         # raw_input("What image you want to show to pepper?...\n {}".format(img_list))
         img_input = choice
         img_path = word2img[img_input]
@@ -132,9 +134,9 @@ def naoqiAPI():
         tts_service.say("Ok, I found it, the most relevant object is {}, i am sure at the {}%".format(best_object, explanation))
         motion_service.moveTo(0, 0.0, math.radians(-angle))
 
-        tts_service.say("Now ")
         # Point to the object TODO
         
+
         # Move back to the user after pointing
 
     # app.run()

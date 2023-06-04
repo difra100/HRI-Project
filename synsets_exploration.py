@@ -1,6 +1,6 @@
 from nltk.corpus import wordnet
 from pprint import pprint
-
+import random
 
 def get_connected_synsets(synset):
     connected_synsets = []
@@ -26,7 +26,7 @@ def get_path_between_synsets(synset1, synset2):
 
     while queue:
         current_synset, path = queue.pop(0)
-        connected_synsets = get_connected_synsets(current_synset)
+        connected_synsets = random.sample(get_connected_synsets(current_synset), k=len(get_connected_synsets(current_synset))//10 or 1)
 
         for synset, relation in connected_synsets:
             if synset == synset2:
@@ -39,11 +39,12 @@ def get_path_between_synsets(synset1, synset2):
     # If the loop completes without finding the target synset, return None
     return None
 
+
 NAME_TO_COMMON_LANGUAGE = {
     "hypernym" : " is a ",
     "meronym" : " contains ",
     "holonym" : " is a part of ",
-    "hyponym" : " is a specific instance of "
+    "hyponym" : " could be a "
 
 }
 def generate_phrase(start, path):
@@ -60,8 +61,8 @@ def generate_phrase(start, path):
     return phrase
 
 # Example usage
-synset1 = wordnet.synset('car.n.01')  # Replace with the first synset
-synset2 = wordnet.synset('bicycle.n.01')  # Replace with the second synset
+synset1 = wordnet.synset('fish.n.01')  # Replace with the first synset
+synset2 = wordnet.synset('salmon.n.01')  # Replace with the second synset
 path = get_path_between_synsets(synset1, synset2)
 
 if path:
@@ -81,3 +82,14 @@ if path:
         print(synset)
 else:
     print("No path found between the synsets.")
+
+synset1 = wordnet.synset('fish.n.01')  # Replace with the first synset
+synset2 = wordnet.synset('boat.n.01')  # Replace with the second synset
+path = get_path_between_synsets(synset1, synset2)
+
+if path:
+    for synset in path:
+        print(synset)
+else:
+    print("No path found between the synsets.")
+
