@@ -30,9 +30,9 @@ def model_run(model, imagepath):
 def predict_top1(model, imagepath, labels):
     # Preprocess the input image
     output = model_run(model, imagepath)
-    _, predicted_idx = torch.max(output, 1)
+    max_score, predicted_idx = torch.max(torch.nn.functional.softmax(output, dim = -1), 1)
     predicted_label = labels[predicted_idx.item()]
-    return predicted_label
+    return predicted_label, max_score.item()
 
 def predict_top_k(model, imagepath, labels, k=5):
     # Preprocess the input image
@@ -70,6 +70,7 @@ with open(labels_path) as f:
 
 # Load pre-trained ResNet50 model
 model = models.resnet50(pretrained=True)
+#model = models.regnet_y_128gf(weights=models.RegNet_Y_128GF_Weights)
 model.eval()
 
 # @persistent_disk_memoize
@@ -106,9 +107,13 @@ def make_title_dict(filename):
         wiki_data[title.lower()] = text
     return wiki_data
 
-wiki_data = make_title_dict(WIKI)
+WIKI_DATA = make_title_dict(WIKI)
 
-print(clean_string(wiki_data['pen'].split("\n\n")[1]))
+if __name__ == '__main__':
+
+    pred = predict_top1(model, 'grace_hopper.jpg', labels)
+    print("PRED IS: ", pred)
+    print(WIKI_DATA[pred]) #clean_string(wiki_data[pred]))#.split("\n\n")[1]))
 
 #pprint(wiki_data)
 # for page_element in root.iter("page"):
