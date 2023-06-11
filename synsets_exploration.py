@@ -1,5 +1,4 @@
 from nltk.corpus import brown
-from a_star import find_path
 import numpy as np
 from collections import defaultdict
 import random
@@ -7,6 +6,75 @@ from pprint import pprint
 from nltk.corpus import wordnet
 import nltk
 nltk.download('wordnet')
+
+
+
+
+from nltk.corpus import wordnet as wn
+from queue import PriorityQueue
+
+
+
+
+def heuristic_cost_estimate(start_synset, goal_synset):
+    # Implement your heuristic function here
+    return -similarity(start_synset, goal_synset) # Default heuristic, always returns 0
+
+def get_connected_synsets(synset):
+    connected_synsets = []
+    for hypernym in synset.hypernyms():
+        connected_synsets.append((hypernym, "hypernym"))
+    for hyponym in synset.hyponyms():
+        connected_synsets.append((hyponym, "hyponym"))
+    for meronym in synset.part_meronyms() + synset.substance_meronyms() + synset.member_holonyms():
+        connected_synsets.append((meronym, "meronym"))
+    for holonym in synset.part_holonyms() + synset.substance_holonyms() + synset.member_meronyms():
+        connected_synsets.append((holonym, "holonym"))
+    return connected_synsets
+
+def a_star(start_synset, goal_synset):
+    open_set = PriorityQueue()
+    open_set.put((0, start_synset, '_'))
+
+    came_from = {}
+    relation_diz = {}
+    g_score = {start_synset: 0}
+    f_score = {start_synset: heuristic_cost_estimate(start_synset, goal_synset)}
+
+    while not open_set.empty():
+        _, current, synset_type = open_set.get()
+
+        if current == goal_synset:
+            relation_diz[current] = synset_type
+            path = reconstruct_path(came_from, current, relation_diz)
+            return path
+
+        connected_synsets = get_connected_synsets(current)
+        for neighbor, synset_type in connected_synsets:
+            tentative_g_score = g_score[current] + 1  # Assuming all edges have a weight of 1
+
+            if neighbor not in g_score or tentative_g_score < g_score[neighbor]:
+                came_from[neighbor] = current
+                relation_diz[neighbor] = synset_type
+                g_score[neighbor] = tentative_g_score
+                # print(tentative_g_score)
+                f_score[neighbor] = tentative_g_score + 5*heuristic_cost_estimate(neighbor, goal_synset)
+                # print(neighbor, goal_synset, heuristic_cost_estimate(neighbor, goal_synset))
+                open_set.put((f_score[neighbor], neighbor, synset_type))
+
+    return None  # No path found
+
+def reconstruct_path(came_from, current, relation_diz):
+    path = [(current, relation_diz[current])]
+    while current in came_from:
+        current = came_from[current]
+        try:
+            relation = relation_diz[current]
+        except KeyError:
+            relation = None
+        path.append((current,relation))
+    path.reverse()
+    return path, relation_diz
 
 
 def get_connected_synsets(synset):
@@ -53,7 +121,7 @@ def similarity(word1, word2):
 
     # print(word1_array.shape)
 
-    return np.dot(word1_array, word2_array)
+    return np.dot(word1_array/(np.linalg.norm(word1_array) + 0.01), word2_array/(np.linalg.norm(word2_array) + 0.01))
 
 
 def get_path_between_synsets(synset1, synset2):
@@ -125,6 +193,24 @@ def generate_phrase(start, path):
         phrase += " " + path[i-1][0].name() + \
             NAME_TO_COMMON_LANGUAGE[item[1]] + item[0].name()
     return phrase
+
+
+def generate_phrase2(start, path):
+    """
+    This function generates natural language phrases based on the start synset,
+    path containing synsets and relations, and creates triplets of start,
+    relation, and end synsets.
+    """
+    pprint(locals())
+    phrase = ""
+    #phrase = start.name() + \
+    #    NAME_TO_COMMON_LANGUAGE.get(path[0][1], " ") + path[0][0].name()
+
+    for i, item in enumerate(path[1:], start=1):
+        phrase += " " + path[i-1][0].name() + \
+            NAME_TO_COMMON_LANGUAGE.get(item[1], " ") + item[0].name()
+    return phrase
+
 
 # Example usage
 
@@ -202,33 +288,27 @@ common_words = {k.lower(): v for k, v in word_freq.most_common(1000)}
 #     print(is_common_word(a))
 #     print("{} is common?".format(b))
 #     print(is_common_word(b))
-def is_goal_reached_f(current, goal):
-    return current==goal
-
-def path_finder_a_star(synset1, synset2):
-    find_path(synset1,
-              synset2,
-              get_connected_synsets,
-              heuristic_cost_estimate_fnct=lambda a,b: -similarity(a,b),
-              distance_between_fnct=lambda a,b: -similarity(a,b),
-              is_goal_reached_fnct=is_goal_reached_f)
-
-
+avg = 0
 for pair in synset_pairs:
 
     w1, w2 = pair
     synset1 = wordnet.synset(w1)  # Replace with the first synset
     synset2 = wordnet.synset(w2)  # Replace with the second synset
+ 
     # path = get_path_between_synsets(synset1, synset2)
-    path = path_finder_a_star(synset1, synset2)
-    print(path)
-    # p = True
-    # if path:
-    #     for synset in path:
-    #         print(synset)
+    path, synsets = a_star(synset1, synset2)
+    print("path", path)
+    avg += len(path)
+    p = True
+    if path:
+        for synset, relation in path[:-1]:
+            print(synset)
+            print(relation)
 
-    # else:
-    #     print("No path found between the synsets.")
+    else:
+        print("No path found between the synsets.")
 
-    print(generate_phrase(synset1, path))
+    print(generate_phrase2(synset1, path))
     print("\n\n\n")
+
+print(avg/float(len(synset_pairs)))
