@@ -32,7 +32,10 @@ def get_connected_synsets(synset):
         connected_synsets.append((holonym, "holonym"))
     return connected_synsets
 
-def a_star(start_synset, goal_synset):
+with open("top_5000.txt") as f:
+    COMMON_WORDS = [x.replace("\n", "").strip() for x in f.readlines()]
+print(COMMON_WORDS)
+def a_star(start_synset, goal_synset, children_mode=False):
     open_set = PriorityQueue()
     open_set.put((0, start_synset, '_'))
 
@@ -43,6 +46,11 @@ def a_star(start_synset, goal_synset):
 
     while not open_set.empty():
         _, current, synset_type = open_set.get()
+        parts = current.name().split(".")[0].split("_")
+        if children_mode and any(part not in COMMON_WORDS for part in parts):
+            cost = 1000
+        else:
+            cost = 1
 
         if current == goal_synset:
             relation_diz[current] = synset_type
@@ -51,7 +59,7 @@ def a_star(start_synset, goal_synset):
 
         connected_synsets = get_connected_synsets(current)
         for neighbor, synset_type in connected_synsets:
-            tentative_g_score = g_score[current] + 1  # Assuming all edges have a weight of 1
+            tentative_g_score = g_score[current] + cost  # Assuming all edges have a weight of 1
 
             if neighbor not in g_score or tentative_g_score < g_score[neighbor]:
                 came_from[neighbor] = current
@@ -288,27 +296,34 @@ common_words = {k.lower(): v for k, v in word_freq.most_common(1000)}
 #     print(is_common_word(a))
 #     print("{} is common?".format(b))
 #     print(is_common_word(b))
-avg = 0
-for pair in synset_pairs:
 
-    w1, w2 = pair
-    synset1 = wordnet.synset(w1)  # Replace with the first synset
-    synset2 = wordnet.synset(w2)  # Replace with the second synset
- 
-    # path = get_path_between_synsets(synset1, synset2)
-    path, synsets = a_star(synset1, synset2)
-    print("path", path)
-    avg += len(path)
-    p = True
-    if path:
-        for synset, relation in path[:-1]:
-            print(synset)
-            print(relation)
+def make_experiment(children_mode, filename):
+    avg = 0
+    with open(filename, "w+") as f:
+        for pair in synset_pairs:
 
-    else:
-        print("No path found between the synsets.")
+            w1, w2 = pair
+            synset1 = wordnet.synset(w1)  # Replace with the first synset
+            synset2 = wordnet.synset(w2)  # Replace with the second synset
+        
+            # path = get_path_between_synsets(synset1, synset2)
+            path, synsets = a_star(synset1, synset2, children_mode=children_mode)
+            f.write("path" + str(path) + "\n")
+            avg += len(path)
+            p = True
+            if path:
+                for synset, relation in path[:-1]:
+                    f.write(str(synset)+"\n")
+                    f.write(str(relation)+"\n")
 
-    print(generate_phrase2(synset1, path))
-    print("\n\n\n")
+            else:
+                f.write("No path found between the synsets.\n")
 
-print(avg/float(len(synset_pairs)))
+            f.write(str(generate_phrase2(synset1, path))+"\n")
+            f.write("\n\n\n")
+
+        f.write(str(avg/float(len(synset_pairs)))+"\n")
+
+if __name__ == "__main__":
+    make_experiment(children_mode=True, filename="child_friendly_phrases.txt")
+    make_experiment(children_mode=False, filename="normal_phrases.txt")
