@@ -1,12 +1,13 @@
 {
-    "book" : "book.n.01",
+    "book" : "book.n.02",
     "pen": "pen.n.01",
     "flask": "flask.n.01",
-    "glass of water": "glass.n.02",
+    "drinking glass": "glass.n.02",
     "guitar": "guitar.n.01",
     "computer": "computer.n.01",
     "tissues": "tissue.n.02",
     "phone": "phone.n.01",
     "bass guitar": "bass_guitar.n.01",
-    "computer mouse": "mouse.n.04"
+    "computer mouse": "mouse.n.04",
+    "glasses": "glasses.n.01"
 }

@@ -34,7 +34,7 @@ def get_connected_synsets(synset):
 
 with open("top_5000.txt") as f:
     COMMON_WORDS = [x.replace("\n", "").strip() for x in f.readlines()]
-print(COMMON_WORDS)
+# print(COMMON_WORDS)
 def a_star(start_synset, goal_synset, children_mode=False):
     open_set = PriorityQueue()
     open_set.put((0, start_synset, '_'))
@@ -160,8 +160,9 @@ def get_path_between_synsets(synset1, synset2):
         all_connected = sorted([x for x in connected_synsets if x[0].name().split(".")[
                                0] not in seen], key=sort_key, reverse=True)
         if all_connected:
-            print(current_synset)
-            print(all_connected)
+            # print(current_synset)
+            # print(all_connected)
+            pass
 
         seen = seen.union(set([x[0].name().split(".")[0]
                           for x in all_connected]))
@@ -193,7 +194,7 @@ def generate_phrase(start, path):
     path containing synsets and relations, and creates triplets of start,
     relation, and end synsets.
     """
-    pprint(locals())
+    # pprint(locals())
     phrase = start.name() + \
         NAME_TO_COMMON_LANGUAGE[path[0][1]] + path[0][0].name()
 
@@ -209,14 +210,14 @@ def generate_phrase2(start, path):
     path containing synsets and relations, and creates triplets of start,
     relation, and end synsets.
     """
-    pprint(locals())
+    # pprint(locals())
     phrase = ""
     #phrase = start.name() + \
     #    NAME_TO_COMMON_LANGUAGE.get(path[0][1], " ") + path[0][0].name()
 
     for i, item in enumerate(path[1:], start=1):
-        phrase += " " + path[i-1][0].name() + \
-            NAME_TO_COMMON_LANGUAGE.get(item[1], " ") + item[0].name()
+        phrase += path[i-1][0].name() + \
+            NAME_TO_COMMON_LANGUAGE.get(item[1], " ") + item[0].name() + ",\n"
     return phrase
 
 
@@ -279,7 +280,7 @@ strange_words = [
 ]
 
 
-print("START SEARCH...")
+# print("START SEARCH...")
 
 nltk.download('brown')  # Download the Brown Corpus
 

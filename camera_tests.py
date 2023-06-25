@@ -12,14 +12,14 @@ testDevice(0) # no printout
 # testDevice(3) # prints message
 
 
-def capture_image():
+def capture_image(filename):
     # Open the webcam
     cap = cv2.VideoCapture(0)
 
     while True:
         # Capture frame-by-frame
         ret, frame = cap.read()
-        print(frame)
+        # print(frame)
 
         # Display the resulting frame
         cv2.imshow('Camera View', frame)
@@ -35,7 +35,8 @@ def capture_image():
     cv2.destroyAllWindows()
 
     # Save the captured image
-    cv2.imwrite('images/captured_image.jpg', frame)
+    cv2.imwrite(filename, frame)
 
 # Call the function to capture the image
-capture_image()
+if __name__ == "__main__":
+    capture_image("images/captured_image.jpg")
