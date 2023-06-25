@@ -60,7 +60,7 @@ def naoqiAPI():
 	# # callback function
 	# anyTouch = memory_service.subscriber("TouchChanged")
 	# idAnyTouch = anyTouch.signal.connect(onTouched)
-	#anyTouch.signal.disconnect(idAnyTouch)
+	# anyTouch.signal.disconnect(idAnyTouch)
  
 
 def pepper_cmd_api():

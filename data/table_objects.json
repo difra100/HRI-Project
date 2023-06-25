@@ -1,0 +1,8 @@
+{
+    "Book of Short Stories": [-90, "book.n.01"],
+    "Guitar": [-60, "guitar.n.01"],
+    "Glass of water": [-30, "glass.n.02"],
+    "Pencil": [30, "pencil.n.01"],
+    "Computer": [60, "computer.n.01"],
+    "Glasses": [90, "glasses.n.01"]
+}

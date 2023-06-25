@@ -1,0 +1,12 @@
+book
+pen
+flask
+glasses
+old man
+guitar
+bird
+wall
+computer
+tissues
+smartphone
+bass guitar

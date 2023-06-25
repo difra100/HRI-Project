@@ -11,23 +11,11 @@ import json
 model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
 processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
 
-labels = [
-    "book: a list of pages"
-    "book: (verb) to pay in advance",
-    "pen",
-    "flask",
-    "glasses",
-    "old man",
-    "guitar",
-    "bird",
-    "wall",
-    "computer",
-    "tissues",
-    "smartphone",
-    "bass guitar"
-]
+with open("data/labels_to_synsets.json") as f:
+    data = json.load(f)
+    labels = list(data.keys())
 
-with open("table_objects.json") as f:
+with open("data/table_objects.json") as f:
     OBJECT_ANGLES = json.load(f)
 
 

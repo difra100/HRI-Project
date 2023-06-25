@@ -12,6 +12,11 @@ import library
 from synsets_exploration import a_star, generate_phrase2
 from nltk.corpus import wordnet
 import nltk
+# from touch_handle import *
+from camera_tests import capture_image
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
+
 nltk.download('wordnet')
 pip = os.getenv('PEPPER_IP')
 
@@ -25,11 +30,15 @@ import pepper_cmd
 
 url = "tcp://" + pip + ":" + str(pport)
 
-with open("table_objects.json") as f:
+with open("data/table_objects.json") as f:
     OBJECT_ANGLES = json.load(f)
 
 def most_relevant_object(result, objects):
     return random.choice(list(objects))
+
+with open("data/labels_to_synsets.json") as f:
+    PRED_TO_SYNSET = json.load(f)
+    labels = sorted(list(PRED_TO_SYNSET.keys()))
 
 import re
 def clean_wiki(result):
@@ -109,6 +118,30 @@ Air is one of the 4 classical elements."""
 # print("OUR CLEANED:")
 # print(clean_wiki(test_article))
 
+def point_at_object(motion):
+    names = []
+    times = []
+    keys = []
+
+    names.append("RShoulderPitch")
+    times.append([1.0, 2.0, 3.0])
+    keys.append([1.0, -0.2, 0.8])
+
+    motion.angleInterpolation(names, keys, times, True)
+
+def handle_touch(touch_service, memory_service):
+    while True:
+        sl = touch_service.getSensorList() # vector of sensor names
+        # print(sl)
+        v = touch_service.getStatus()  # vector of sensor status [name, bool]
+        # print(v)
+
+        # print("STATUS")
+        for a, b, c in v:
+            if b == True:
+                print("TOUCHED")
+
+
 def naoqiAPI():
     # session = qi.Session()
 
@@ -116,6 +149,7 @@ def naoqiAPI():
     app = qi.Application(["App", "--qi-url=" + url])
     app.start()
     session = app.session
+    ALMotion = session.service("ALMotion")
 
     memory_service = app.session.service("ALMemory")
 
@@ -130,9 +164,23 @@ def naoqiAPI():
     tts_service.say("Hello, I am a curiosity bot!")
     # time.sleep(1)
 
+    # touch_service = session.service("ALTouch")
+    # handle_touch(touch_service, memory_service)
+    
+    # touch_obj = ReactToTouch(session)
+
+
     tts_service.say(
         "If you show me some images i can tell you some facts about it.")
     # time.sleep(1.5)
+
+    tts_service.say("I will take a photo in 5 seconds, be fast and choose an object to show me.")
+    
+    raw_input("Touch my head when you are ready (press enter in the terminal in this demo)")
+
+    capture_image()
+
+    new_image_path = 'images/captured_image.jpg'
 
     word2img = {'old man':    'images/grace_hopper.jpg',
                 'pen': 'images/pen.webp',
@@ -140,7 +188,9 @@ def naoqiAPI():
                 'flask': 'images/flask.jpg',
                 'glasses': 'images/glasses.webp',
                 'guitar': 'images/guitar.jpeg',
-                'bass': 'images/bass.jpeg'}
+                'bass': 'images/bass.jpeg',
+                'images/captured_image.jpg' : 'images/captured_image.jpg'
+}
     img_list = list(word2img.keys())
 
     improve_image_msg = " please try to improve room lighting and put the object closer to the camera,"
@@ -154,7 +204,7 @@ def naoqiAPI():
 
     n_tab_obj = len(OBJECT_ANGLES)
 
-    for choice in img_list:
+    for choice in [new_image_path] + img_list:
         print("choice", choice)
         tts_service.say(
             "You are now showing the image of a {}".format(choice))
@@ -216,28 +266,30 @@ def naoqiAPI():
         
 
         # best_object = most_relevant_object(result, OBJECT_ANGLES.keys())
-        angle = OBJECT_ANGLES[best_object]
+        angle, table_synset = OBJECT_ANGLES[best_object]
         explanation = str(round(score_table*100, 4)) # to do, do from best_object, should be a return value from most_relevant_object
         tts_service.say("Let me check which one of my objects is most similar to yours and why")
         
         # for testing
         
-        # motion_service.moveTo(0.0, 0.0, math.radians(90))
-        # motion_service.moveTo(0.0, 0.0, math.radians(- 180))
-        # motion_service.moveTo(0.0, 0.0, math.radians(angle + 90))
+        motion_service.moveTo(0.0, 0.0, math.radians(90))
+        motion_service.moveTo(0.0, 0.0, math.radians(- 180))
+        motion_service.moveTo(0.0, 0.0, math.radians(angle + 90))
+        point_at_object(ALMotion)
         tts_service.say("Ok, I found it, the most relevant object is {}, i am sure at the {}%".format(best_object, explanation))
-        # motion_service.moveTo(0, 0.0, math.radians(-angle))
+        motion_service.moveTo(0, 0.0, math.radians(-angle))
 
         # this must be done with synsets, how to choose best synset
         # for the user image? just make a dict ourselves
-        synset1 = wordnet.synset(pred.replace(" ", "_") + ".n.01") # use dict instead
-        synset2 = wordnet.synset(best_object.replace(" ", "_") + ".n.01")
+        synset1 = wordnet.synset(PRED_TO_SYNSET[pred.lower()]) # use dict instead
+        synset2 = wordnet.synset(table_synset)
         path, synsets = a_star(synset1, synset2)
         phrase = generate_phrase2(pred, path)
 
         phrase = phrase.replace("_", " ")
         phrase = re.sub("\.n\.[0-9]+", "", phrase) # otherwise get definition
 
+        tts_service.say("Let me tell you why your object and mine are connected.")
         tts_service.say(phrase)
         print(phrase)
         # Point to the object TODO
