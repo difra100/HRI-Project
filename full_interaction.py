@@ -13,9 +13,10 @@ from synsets_exploration import a_star, generate_phrase2
 from nltk.corpus import wordnet
 import nltk
 # from touch_handle import *
-from camera_tests import capture_image
+# from camera_tests import capture_image
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
+from example_victory import pepperVictory
 
 nltk.download('wordnet')
 pip = os.getenv('PEPPER_IP')
@@ -157,33 +158,45 @@ def naoqiAPI():
 
     # ALDialog = session.service("ALDialog")
 
+    configuration = {"bodyLanguageMode":"disabled"}
+    
     # voice only
-    tts_service = session.service("ALTextToSpeech")
-    tts_service.setLanguage("English")
-    tts_service.setParameter("speed", 90)
-    tts_service.say("Hello, I am a curiosity bot!")
+    tts_service = session.service("ALAnimatedSpeech")
+
+    # ttw = { "hello" : ["hey", "yo"],
+    #         "everything" : ["everybody"] }
+
+    # print("BODY LANGUAGE MODE IS: ", tts_service.getBodyLanguageMode())
+
+    # tts_service.addTagsToWords(ttw)
+    # tts_service.setLanguage("English")
+    # tts_service.say("Hello! ^start(animations/Stand/Gestures/Hey_1) Nice to meet you!", configuration)
+    # tts_service.setParameter("speed", 90)
+    # pepperVictory(session)
+    tts_service.say("Hello, I am a curiosity bot!", configuration)
     # time.sleep(1)
 
     # touch_service = session.service("ALTouch")
     # handle_touch(touch_service, memory_service)
+    # pepperVictory(session)
     
     # touch_obj = ReactToTouch(session)
-    tts_service.say("How old are you?")
+    tts_service.say("How old are you?", configuration)
     age = raw_input("Enter a number for your age > ")
 
     children_mode = False
     if int(age) < 10:
         children_mode = True
-        tts_service.say("Aw, well, you are so young!")
+        tts_service.say("Aw, well, you are so young!", configuration)
 
     tts_service.say(
-        "If you show me something i can tell you some facts about it.")
+        "If you show me something i can tell you some facts about it.", configuration)
     # time.sleep(1.5)
 
     improve_image_msg = " please try to improve room lighting and put the object closer to the camera,"
     range_to_message = {
-        (90, 100): "I am really sure that this is",
-        (80, 90): "I am quite sure that this is",
+        (95, 100): "I am really sure that this is ",
+        (80, 95): "I am quite sure that this is",
         (50, 80): "I think that it is quite probable that this is",
         (30, 50): "I am a bit confused,"+improve_image_msg+"maybe this is...",
         (0, 30): "I am really confused"+improve_image_msg+"I can guess that the object is...",
@@ -192,14 +205,16 @@ def naoqiAPI():
     n_tab_obj = len(OBJECT_ANGLES)
 
     iteration = 0
+    
     while True:
+        modality = "image"
         iteration += 1
-        tts_service.say("Touch my head when you are ready.......")
+        tts_service.say("Touch my head when you are ready.......", configuration)
 
         raw_input("Press enter in the terminal to take a photo in this demo > ")
 
         filename = 'images/captured_image_' + str(iteration) + '.jpg'
-        capture_image(filename)
+        # capture_image(filename)
         time.sleep(5) # 10
 
         # tts_service.say(
@@ -234,15 +249,56 @@ def naoqiAPI():
             #print(threshold, range_to_message[threshold], score)
             if threshold[0] < score * 100 < threshold[1]:
                 msg = range_to_message[threshold]
-        tts_service.say(msg + " {}.".format(pred))
-        print("The confidence for {} is equals to {}%".format(pred, round(score*100)))
+        
+        # Uncertainty on the prediction (below 95%)
+        if score*100 < 95:
 
-        if score*100 < 50:
-            tts_service.say("Let me take a look again....")
-            continue
+            tts_service.say(msg + " {}. Do you agree?".format(pred), configuration)
+            answ = raw_input("<< Choose Yes or No >>")
+            answ = answ.lower()
+
+            if answ == "yes" or answ == "y":
+                pass
+            else:
+                tts_service.say("I am sorry for the confusion. Do you want to show me the object again, or tell me what it is?", configuration)
+                answ_obj = raw_input("<< (1) Show the object again; (2) Write the name >>")
+
+                if answ_obj == "1":
+                    continue
+                else:
+                    modality = "text"
+                    name = raw_input("<< Enter the object's name >>")
+
+                    p = random.random()
+
+                    new_msg = "Oh, the object was {}....".format(name)
+                    
+                    if p > 0.5:
+                        new_msg += " I thought to something similar."
+                    else:
+                        new_msg += " I had no idea."
+                    
+
+                    
+                    
+                tts_service.say(new_msg, configuration)
+            
+
+
+             
+        else:
+            tts_service.say(msg + " {}.".format(pred), configuration)
+            print("The confidence for {} is equals to {}%".format(pred, round(score*100)))
+
+        # if score*100 < 50:
+        #     tts_service.say("Let me take a look again....", configuration)
+        #     continue
         
         # time.sleep(2)
-
+        if modality == "text":
+            result = library.classify_text(name)
+            best_object, score_table = max(result, key = lambda x: x[1])
+            pred = name
         msg = 'Unfortunately I have nothing interesting to say about this.'
         result = ""
         try:
@@ -250,27 +306,28 @@ def naoqiAPI():
             # print("Before acessing wikipedia pred is ", pred)
             result = library.WIKI_DATA[pred]
         except KeyError:
-            tts_service.say(msg)
+            tts_service.say(msg, configuration)
         if '#redirect' in result.lower():
-            tts_service.say(msg)
+            tts_service.say(msg, configuration)
         elif result:
-            tts_service.say("Let me tell you something about it...")
+            tts_service.say("Let me tell you something about it...", configuration)
             result = clean_wiki(result)
 
             # voice and gestures
             # ans_service = session.service("ALAnimatedSpeech")
             # configuration = {"bodyLanguageMode":"contextual"}
 
-            tts_service.say(result)
+            tts_service.say(result, configuration)
 
         
         
 
         # best_object = most_relevant_object(result, OBJECT_ANGLES.keys())
+        
+
         angle, table_synset = OBJECT_ANGLES[best_object]
         explanation = str(round(score_table*100, 4)) # to do, do from best_object, should be a return value from most_relevant_object
-        tts_service.say("Let me check which one of my objects is most similar to yours and why")
-        
+        tts_service.say("Let me check which one of my objects is most similar to yours and why", configuration)
         # for testing
         
         motion_service.moveTo(0.0, 0.0, math.radians(90))
@@ -278,7 +335,7 @@ def naoqiAPI():
         motion_service.moveTo(0.0, 0.0, math.radians(angle + 90))
         point_at_object(ALMotion)
         if table_synset != PRED_TO_SYNSET[pred]:
-            tts_service.say("Ok, I found it, the most relevant object is {}".format(best_object))
+            tts_service.say("Ok, I found it, the most relevant object is {}".format(best_object), configuration)
             print("The association with {} has a confidence of {}%".format(best_object, explanation))
 
         motion_service.moveTo(0, 0.0, math.radians(-angle))
@@ -294,10 +351,10 @@ def naoqiAPI():
         phrase = re.sub("\.n\.[0-9]+", "", phrase) # otherwise get definition
 
         if phrase:
-            tts_service.say("Let me tell you why your object and mine are connected.")
-            tts_service.say(phrase)
+            tts_service.say("Let me tell you why your object and mine are connected.", configuration)
+            tts_service.say(phrase, configuration)
         else:
-            tts_service.say("I also have a " + pred.lower() + " on my table.")
+            tts_service.say("I also have a " + pred.lower() + " on my table.", configuration)
         # print(phrase)
         # Point to the object TODO
         

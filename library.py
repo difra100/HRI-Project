@@ -18,7 +18,11 @@ def classify_image(image_path):
     stream = os.popen(
         'python3 classify_image3.py {}'.format(image_path))
     output = stream.read()
-    print(locals())
+    return eval(output)
+def classify_text(text):
+    stream = os.popen(
+        'python3 classify_text3.py {}'.format(text))
+    output = stream.read()
     return eval(output)
 
 
