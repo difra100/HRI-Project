@@ -13,10 +13,10 @@ from synsets_exploration import a_star, generate_phrase2
 from nltk.corpus import wordnet
 import nltk
 # from touch_handle import *
-# from camera_tests import capture_image
+from camera_tests import capture_image
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
-from example_victory import pepperVictory
+from pepper_motion import *
 
 nltk.download('wordnet')
 pip = os.getenv('PEPPER_IP')
@@ -119,28 +119,9 @@ Air is one of the 4 classical elements."""
 # print("OUR CLEANED:")
 # print(clean_wiki(test_article))
 
-def point_at_object(motion):
-    names = []
-    times = []
-    keys = []
 
-    names.append("RShoulderPitch")
-    times.append([1.0, 2.0, 3.0])
-    keys.append([1.0, -0.2, 0.8])
 
-    motion.angleInterpolation(names, keys, times, True)
 
-def handle_touch(touch_service, memory_service):
-    while True:
-        sl = touch_service.getSensorList() # vector of sensor names
-        # print(sl)
-        v = touch_service.getStatus()  # vector of sensor status [name, bool]
-        # print(v)
-
-        # print("STATUS")
-        for a, b, c in v:
-            if b == True:
-                print("TOUCHED")
 
 
 def naoqiAPI():
@@ -173,24 +154,26 @@ def naoqiAPI():
     # tts_service.say("Hello! ^start(animations/Stand/Gestures/Hey_1) Nice to meet you!", configuration)
     # tts_service.setParameter("speed", 90)
     # pepperVictory(session)
-    tts_service.say("Hello, I am a curiosity bot!", configuration)
-    # time.sleep(1)
 
+    move_and_say(text = "Hello, I am a curiosity bot!", robot = session, service = tts_service, configuration = configuration, motion = 0)
+    # time.sleep(1)
+    
     # touch_service = session.service("ALTouch")
     # handle_touch(touch_service, memory_service)
     # pepperVictory(session)
     
     # touch_obj = ReactToTouch(session)
-    tts_service.say("How old are you?", configuration)
+    move_and_say(text = "How old are you?", robot = session, service = tts_service, configuration = configuration, motion = 1)
+
     age = raw_input("Enter a number for your age > ")
 
     children_mode = False
     if int(age) < 10:
         children_mode = True
-        tts_service.say("Aw, well, you are so young!", configuration)
+        move_and_say(text = "Aw, well, you are so young!", robot = session, service = tts_service, configuration = configuration, motion = None)
 
-    tts_service.say(
-        "If you show me something i can tell you some facts about it.", configuration)
+    move_and_say(text = "If you show me something i can tell you some facts about it.", robot = session, service = tts_service, configuration = configuration, motion = 1)
+    
     # time.sleep(1.5)
 
     improve_image_msg = " please try to improve room lighting and put the object closer to the camera,"
@@ -209,12 +192,13 @@ def naoqiAPI():
     while True:
         modality = "image"
         iteration += 1
-        tts_service.say("Touch my head when you are ready.......", configuration)
+        move_and_say(text = "Touch my head when you are ready.......", robot = session, service = tts_service, configuration = configuration, motion = 1)
+
 
         raw_input("Press enter in the terminal to take a photo in this demo > ")
 
         filename = 'images/captured_image_' + str(iteration) + '.jpg'
-        # capture_image(filename)
+        capture_image(filename)
         time.sleep(5) # 10
 
         # tts_service.say(
@@ -253,14 +237,16 @@ def naoqiAPI():
         # Uncertainty on the prediction (below 95%)
         if score*100 < 95:
 
-            tts_service.say(msg + " {}. Do you agree?".format(pred), configuration)
+            move_and_say(text = msg + " {}. Do you agree?".format(pred), robot = session, service = tts_service, configuration = configuration, motion = 1)
+            
             answ = raw_input("<< Choose Yes or No >>")
             answ = answ.lower()
 
             if answ == "yes" or answ == "y":
                 pass
             else:
-                tts_service.say("I am sorry for the confusion. Do you want to show me the object again, or tell me what it is?", configuration)
+                move_and_say(text = "I am sorry for the confusion. Do you want to show me the object again, or tell me what it is?", robot = session, service = tts_service, configuration = configuration, motion = 3)
+
                 answ_obj = raw_input("<< (1) Show the object again; (2) Write the name >>")
 
                 if answ_obj == "1":
@@ -281,13 +267,15 @@ def naoqiAPI():
 
                     
                     
-                tts_service.say(new_msg, configuration)
+                move_and_say(text = new_msg, robot = session, service = tts_service, configuration = configuration, motion = 3)
+                
             
 
 
              
         else:
-            tts_service.say(msg + " {}.".format(pred), configuration)
+            move_and_say(text = msg + " {}.".format(pred), robot = session, service = tts_service, configuration = configuration, motion = 1)
+
             print("The confidence for {} is equals to {}%".format(pred, round(score*100)))
 
         # if score*100 < 50:
@@ -301,16 +289,20 @@ def naoqiAPI():
             pred = name
         msg = 'Unfortunately I have nothing interesting to say about this.'
         result = ""
+
         try:
             # clean_string(wiki_data[pred]))#.split("\n\n")[1]))
             # print("Before acessing wikipedia pred is ", pred)
             result = library.WIKI_DATA[pred]
         except KeyError:
-            tts_service.say(msg, configuration)
+            move_and_say(text = msg, robot = session, service = tts_service, configuration = configuration, motion = 2)
+
         if '#redirect' in result.lower():
-            tts_service.say(msg, configuration)
+            move_and_say(text = msg, robot = session, service = tts_service, configuration = configuration, motion = 2)
+
         elif result:
-            tts_service.say("Let me tell you something about it...", configuration)
+            move_and_say(text = "Let me tell you something about it...",robot = session, service = tts_service, configuration = configuration, motion = 2)
+
             result = clean_wiki(result)
 
             # voice and gestures
@@ -327,16 +319,22 @@ def naoqiAPI():
 
         angle, table_synset = OBJECT_ANGLES[best_object]
         explanation = str(round(score_table*100, 4)) # to do, do from best_object, should be a return value from most_relevant_object
-        tts_service.say("Let me check which one of my objects is most similar to yours and why", configuration)
+
+        move_and_say(text = "Let me check which one of my objects is most similar to yours and why",robot = session, service = tts_service, configuration = configuration, motion = 1)
+
         # for testing
         
         motion_service.moveTo(0.0, 0.0, math.radians(90))
         motion_service.moveTo(0.0, 0.0, math.radians(- 180))
         motion_service.moveTo(0.0, 0.0, math.radians(angle + 90))
         point_at_object(ALMotion)
-        if table_synset != PRED_TO_SYNSET[pred]:
-            tts_service.say("Ok, I found it, the most relevant object is {}".format(best_object), configuration)
-            print("The association with {} has a confidence of {}%".format(best_object, explanation))
+        if pred in PRED_TO_SYNSET:
+            if table_synset != PRED_TO_SYNSET[pred]:
+                print("The association with {} has a confidence of {}%".format(best_object, explanation))
+                move_and_say(text = "Ok, I found it, the most relevant object is {}".format(best_object),robot = session, service = tts_service, configuration = configuration, motion = 1)
+        else:
+            move_and_say(text = "I do not have nothing similar to it in my table".format(best_object),robot = session, service = tts_service, configuration = configuration, motion = 3)
+
 
         motion_service.moveTo(0, 0.0, math.radians(-angle))
 
@@ -349,15 +347,16 @@ def naoqiAPI():
 
         phrase = phrase.replace("_", " ")
         phrase = re.sub("\.n\.[0-9]+", "", phrase) # otherwise get definition
-
-        if phrase:
-            tts_service.say("Let me tell you why your object and mine are connected.", configuration)
-            tts_service.say(phrase, configuration)
-        else:
-            tts_service.say("I also have a " + pred.lower() + " on my table.", configuration)
-        # print(phrase)
-        # Point to the object TODO
         
+        if phrase:
+            move_and_say(text ="Let me tell you why your object and mine are connected.",robot = session, service = tts_service, configuration = configuration, motion = 1)
+            move_and_say(text =phrase,robot = session, service = tts_service, configuration = configuration, motion = 2)
+        
+        else:
+            move_and_say(text ="I also have a " + pred.lower() + " on my table.",robot = session, service = tts_service, configuration = configuration, motion = 2)
+
+         
+
 
         # Move back to the user after pointing
 
