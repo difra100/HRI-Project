@@ -42,7 +42,7 @@ with open("data/labels_to_synsets.json") as f:
     labels = sorted(list(PRED_TO_SYNSET.keys()))
 
 import re
-def clean_wiki(result):
+def clean_wiki(result, children_mode):
     # Remove everything in <ref> </ref>
     regex = r"\<ref\>(.*?)\<\/ref\>"
     result = re.sub(regex, "", result, flags =  re.DOTALL)
@@ -72,10 +72,26 @@ def clean_wiki(result):
 
     final = ""
     maxlen = 300
+    if children_mode:
+        maxlen /= 2
+
     for phrase in introduction_only.split("."):
         if len(final) < maxlen:
             final += phrase + '.'
     return final.replace("'''", "")
+
+def conclude_conversation(session, service, configuration):
+    move_and_say(text = "Do you want to show me anything else?",robot = session, service = service, configuration = configuration, motion = 1)
+    response = False
+    answ = raw_input("<< Choose Yes or No >>")
+    answ = answ.lower()
+
+    if answ == "no" or answ == "n":
+        move_and_say(text = "It has been a pleasure interacting with you!",robot = session, service = service, configuration = configuration, motion = 2)
+        move_and_say(text = "Bye bye. Can't wait to talk with you again.",robot = session, service = service, configuration = configuration, motion = 0)
+        response = True
+    return response
+
 test_article = """'''Air''' is the [[Earth]]'s [[atmosphere]]. Air is a [[mixture]] of many gases and tiny dust particles. It is the clear [[gas]] in which living things live and [[breathe]]. It has an indefinite shape and [[volume]]. It has [[mass]] and [[weight]], because it is [[matter]]. The weight of air creates [[atmosphere pressure|atmospheric pressure]]. There is no air in [[outer space]].
 
 Air can be [[air pollution|polluted]] by some gases (such as [[carbon monoxide]], hydrocarbons, and nitrogen oxides), [[smoke]], and ash. This [[air pollution]] causes various problems including [[smog]], [[acid rain]] and [[global warming]]. It can damage people's [[health]] and the environment. There are debates about whether or not to act upon climate change, but soon enough the Earth will heat up to much, causing our home to become too hot and not support life! Some say fewer people would die of cold weather, and that is true but there is already a huge amount of people dying from heat and that number is and will keep increasing at a frighting height.
@@ -170,7 +186,9 @@ def naoqiAPI():
     children_mode = False
     if int(age) < 10:
         children_mode = True
-        move_and_say(text = "Aw, well, you are so young!", robot = session, service = tts_service, configuration = configuration, motion = None)
+        move_and_say(text = "Aw, well, you are so young!", robot = session, service = tts_service, configuration = configuration, motion = 3)
+    else:
+        move_and_say(text = "Ah ok, so you are old enough to understand more complex explanation.", robot = session, service = tts_service, configuration = configuration, motion = 2)
 
     move_and_say(text = "If you show me something i can tell you some facts about it.", robot = session, service = tts_service, configuration = configuration, motion = 1)
     
@@ -259,6 +277,17 @@ def naoqiAPI():
 
                     new_msg = "Oh, the object was {}....".format(name)
                     
+                    if name not in PRED_TO_SYNSET:
+                        move_and_say(text = "I do not know what a {} is. I am really sorry.".format(name),robot = session, service = tts_service, configuration = configuration, motion = 3)
+                        response = conclude_conversation(session, tts_service, configuration)
+                        if response:
+                            break
+                        else:
+                            continue
+
+
+            
+
                     if p > 0.5:
                         new_msg += " I thought to something similar."
                     else:
@@ -303,7 +332,7 @@ def naoqiAPI():
         elif result:
             move_and_say(text = "Let me tell you something about it...",robot = session, service = tts_service, configuration = configuration, motion = 2)
 
-            result = clean_wiki(result)
+            result = clean_wiki(result, children_mode=children_mode)
 
             # voice and gestures
             # ans_service = session.service("ALAnimatedSpeech")
@@ -320,7 +349,7 @@ def naoqiAPI():
         angle, table_synset = OBJECT_ANGLES[best_object]
         explanation = str(round(score_table*100, 4)) # to do, do from best_object, should be a return value from most_relevant_object
 
-        move_and_say(text = "Let me check which one of my objects is most similar to yours and why",robot = session, service = tts_service, configuration = configuration, motion = 1)
+        # move_and_say(text = "Let me check which one of my objects is most similar to yours and why",robot = session, service = tts_service, configuration = configuration, motion = 1)
 
         # for testing
         
@@ -328,14 +357,11 @@ def naoqiAPI():
         motion_service.moveTo(0.0, 0.0, math.radians(- 180))
         motion_service.moveTo(0.0, 0.0, math.radians(angle + 90))
         point_at_object(ALMotion)
-        if pred in PRED_TO_SYNSET:
-            if table_synset != PRED_TO_SYNSET[pred]:
+        if table_synset != PRED_TO_SYNSET[pred]:
                 print("The association with {} has a confidence of {}%".format(best_object, explanation))
-                move_and_say(text = "Ok, I found it, the most relevant object is {}".format(best_object),robot = session, service = tts_service, configuration = configuration, motion = 1)
-        else:
-            move_and_say(text = "I do not have nothing similar to it in my table".format(best_object),robot = session, service = tts_service, configuration = configuration, motion = 3)
-
-
+                # move_and_say(text = "Ok, I found it, the most relevant object is {}".format(best_object),robot = session, service = tts_service, configuration = configuration, motion = 1)
+       
+            
         motion_service.moveTo(0, 0.0, math.radians(-angle))
 
         # this must be done with synsets, how to choose best synset
@@ -356,6 +382,14 @@ def naoqiAPI():
             move_and_say(text ="I also have a " + pred.lower() + " on my table.",robot = session, service = tts_service, configuration = configuration, motion = 2)
 
          
+        response = conclude_conversation(session, tts_service, configuration)
+        if response:
+            break
+        else:
+            continue
+
+            
+
 
 
         # Move back to the user after pointing
