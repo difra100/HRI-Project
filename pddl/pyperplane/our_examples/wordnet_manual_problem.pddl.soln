@@ -1,0 +1,3 @@
+(move-related-to fish water)
+(move-related-to water boat)
+(move-is-a boat vehicle)
