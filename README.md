@@ -1,6 +1,19 @@
 # HRI-Project
 
-COPY FROM REPORT INTRODUCTION
+The education of young children is fundamental to the progress of society, and it is proved that hands-on learning empowers their curiosity and improves the level of attention of the youngest. 
+Since a shortage of teachers teachershortage still affects many developed countries, we have thought of a Curiosity Bot that placed in several contexts (e.g., in libraries, restaurants, hospitals) can interact with children, satisfying their curiosity on everyday objects. According to this modality is possible to improve their learning capabilities.
+To develop this project, we decided to rely on the Pepper robot's architecture because its physiognomy is intentionally designed to cultivate empathy with the user and foster a curiosity-driven interaction with humans.
+We firmly believe that this deliberate choice aligns with the principles of the uncanny valley , effectively enhancing the user's curiosity during the interaction.
+
+
+The Curiosity Bot should be placed behind a table with a few objects on it, a typical interaction with the robot can be summarized as follows:
+
+- Pepper asks the children to show any object;
+- Recognizes the object and provides a description of it;
+- Connects the object shown with the most similar item on the table and formulate a logical sentence to show their connection.
+
+This basic interaction loop is animated by an ask & reply-like conversation between the robot and the child, in order to assure a continuity between the two subjects. 
+Our work takes advantage of Human-Robot Interaction (HRI) techniques to interface with the user in a natural way: moving around, pointing at objects, and giving the interlocutor a chance to interact, with the intent of generating a non-linear dialogue. On the other hand, Reasoning Agents (RA) techniques,  were used to generate the sentences that relate the object shown by the user and an object on the table. This is accomplished by automatically choosing a path to connect their synsets in the WordNet wordnet graph.
 
 # Project structure
 
