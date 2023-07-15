@@ -24,7 +24,7 @@ from queue import PriorityQueue
 
 def heuristic_cost_estimate(start_synset, goal_synset):
     # Implement your heuristic function here
-    return -similarity(start_synset, goal_synset)
+    return 1 - similarity(start_synset, goal_synset)
 
 def get_connected_synsets(synset):
     connected_synsets = []
@@ -72,7 +72,7 @@ def a_star(start_synset, goal_synset, children_mode=False):
                 relation_diz[neighbor] = synset_type
                 g_score[neighbor] = tentative_g_score
                 # print(tentative_g_score)
-                f_score[neighbor] = tentative_g_score + 5*heuristic_cost_estimate(neighbor, goal_synset)
+                f_score[neighbor] = tentative_g_score + heuristic_cost_estimate(neighbor, goal_synset)
                 # print(neighbor, goal_synset, heuristic_cost_estimate(neighbor, goal_synset))
                 open_set.put((f_score[neighbor], neighbor, synset_type))
 
