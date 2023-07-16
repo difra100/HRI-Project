@@ -1,7 +1,7 @@
 # HRI-Project
 
 The education of young children is fundamental to the progress of society, and it is proved that hands-on learning empowers their curiosity and improves the level of attention of the youngest. 
-Since a shortage of teachers teachershortage still affects many developed countries, we have thought of a Curiosity Bot that placed in several contexts (e.g., in libraries, restaurants, hospitals) can interact with children, satisfying their curiosity on everyday objects. According to this modality is possible to improve their learning capabilities.
+Since a shortage of teachers still affects many developed countries, we have thought of a Curiosity Bot that placed in several contexts (e.g., in libraries, restaurants, hospitals) can interact with children, satisfying their curiosity on everyday objects. According to this modality is possible to improve their learning capabilities.
 To develop this project, we decided to rely on the Pepper robot's architecture because its physiognomy is intentionally designed to cultivate empathy with the user and foster a curiosity-driven interaction with humans.
 We firmly believe that this deliberate choice aligns with the principles of the uncanny valley , effectively enhancing the user's curiosity during the interaction.
 
