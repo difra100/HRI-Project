@@ -27,7 +27,7 @@ The implementation of this project is divided in the following files and folders
 - - `hri_small_example` that contains a small example of translating wordnet into pddl files, where the pddl problem, that contains the wordnet connections written in pddl language is manually written, together with the solution given by pyperplan.
 - - `hri_large_example` that contains the code necessary to automatically convert the whole WordNet into a PDDL problem file, as mentioned in the report, the implementation is correct as validated by giving the correct result in many simple examples (of which you can find one in the `hri_small_example` folder) but the grounding is too slow to use it for real time human interaction when using the whole WordNet.
 
-- The `camera_photo` file contains the code to take a photo with the webcam to make the demo more interactivel.
+- The `camera_photo.py` file contains the code to take a photo with the webcam to make the demo more interactivel.
 
 - The `library.py` file contains many useful accessory functionality such as downloading the simple english Wikipedia archive the first time the code is run and using the pretrained CLIP model for image and text classification by calling the `classify_image3.py` and `classify_text3.py` files (that are written in Python 3 because of compatibility reasons). It also imports the file `utils.py` that contains other simpler and more general utility functions.
 
