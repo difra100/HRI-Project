@@ -29,46 +29,6 @@ def classify_text(text):
     output = stream.read()
     return eval(output)
 
-def model_run(model, imagepath):
-    image_path = imagepath
-    image = Image.open(image_path)
-    preprocess = transforms.Compose([
-        transforms.Resize(256),
-        transforms.CenterCrop(224),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[
-                             0.229, 0.224, 0.225])
-    ])
-    input_tensor = preprocess(image)
-    input_batch = input_tensor.unsqueeze(0)
-
-    # Run the input through the model
-    with torch.no_grad():
-        output = model(input_batch)
-    return output
-
-
-def predict_top1(model, imagepath, labels):
-    # Preprocess the input image
-    output = model_run(model, imagepath)
-    max_score, predicted_idx = torch.max(
-        torch.nn.functional.softmax(output, dim=-1), 1)
-    predicted_label = labels[predicted_idx.item()]
-    return predicted_label, max_score.item()
-
-
-def predict_top_k(model, imagepath, labels, k=5):
-    # Preprocess the input image
-    output = model_run(model, imagepath)
-    _, predicted_indices = torch.topk(output, k)
-
-    predictions = []
-    for idx in predicted_indices.squeeze():
-        predicted_label = labels[idx.item()]
-        predicted_score = output[0][idx].item()
-        predictions.append((predicted_label, predicted_score))
-
-    return predictions
 
 
 GLOVE = "glove.6B.zip"
