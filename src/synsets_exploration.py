@@ -38,9 +38,7 @@ def get_connected_synsets(synset):
         connected_synsets.append((holonym, "holonym"))
     return connected_synsets
 
-# with open("top_5000.txt") as f:
-#     COMMON_WORDS = [x.replace("\n", "").strip() for x in f.readlines()]
-# print(COMMON_WORDS)
+
 def a_star(start_synset, goal_synset, children_mode=False):
     open_set = PriorityQueue()
     open_set.put((0, start_synset, '_'))
@@ -53,10 +51,7 @@ def a_star(start_synset, goal_synset, children_mode=False):
     while not open_set.empty():
         _, current, synset_type = open_set.get()
         parts = current.name().split(".")[0].split("_")
-        # if children_mode and any(part not in COMMON_WORDS for part in parts):
-        #     cost = 1000
-        # else:
-        #     cost = 1
+       
         cost = 1
         if current == goal_synset:
             relation_diz[current] = synset_type
@@ -71,9 +66,9 @@ def a_star(start_synset, goal_synset, children_mode=False):
                 came_from[neighbor] = current
                 relation_diz[neighbor] = synset_type
                 g_score[neighbor] = tentative_g_score
-                # print(tentative_g_score)
+
                 f_score[neighbor] = tentative_g_score + heuristic_cost_estimate(neighbor, goal_synset)
-                # print(neighbor, goal_synset, heuristic_cost_estimate(neighbor, goal_synset))
+              
                 open_set.put((f_score[neighbor], neighbor, synset_type))
 
     return None  # No path found
@@ -130,10 +125,7 @@ def similarity(word1, word2):
                           for subword1_clean in word1_clean.split("_")], axis=0)
     word2_array = np.mean([glove_dict[subword2_clean]
                           for subword2_clean in word2_clean.split("_")], axis=0)
-    # word1_array = glove_dict[word1_clean]
-    # word2_array = glove_dict[word2_clean]
 
-    # print(word1_array.shape)
 
     return np.dot(word1_array/(np.linalg.norm(word1_array) + 0.01), word2_array/(np.linalg.norm(word2_array) + 0.01))
 
@@ -160,14 +152,12 @@ def get_path_between_synsets(synset1, synset2):
             except KeyError:
                 freq = 100
 
-            # + similarity(synset1, x[0])#(8.0 if x[1] in ("hypernym", "hyponym") else 0.0) + similarity(x[0], synset2)
             return similarity(x[0], synset2)
 
         all_connected = sorted([x for x in connected_synsets if x[0].name().split(".")[
                                0] not in seen], key=sort_key, reverse=True)
         if all_connected:
-            # print(current_synset)
-            # print(all_connected)
+
             pass
 
         seen = seen.union(set([x[0].name().split(".")[0]
@@ -200,7 +190,7 @@ def generate_phrase(start, path):
     path containing synsets and relations, and creates triplets of start,
     relation, and end synsets.
     """
-    # pprint(locals())
+
     phrase = start.name() + \
         NAME_TO_COMMON_LANGUAGE[path[0][1]] + path[0][0].name()
 
@@ -216,10 +206,8 @@ def generate_phrase2(start, path):
     path containing synsets and relations, and creates triplets of start,
     relation, and end synsets.
     """
-    # pprint(locals())
+
     phrase = ""
-    #phrase = start.name() + \
-    #    NAME_TO_COMMON_LANGUAGE.get(path[0][1], " ") + path[0][0].name()
 
     for i, item in enumerate(path[1:], start=1):
         phrase += path[i-1][0].name() + \
@@ -286,7 +274,6 @@ strange_words = [
 ]
 
 
-# print("START SEARCH...")
 
 nltk.download('brown')  # Download the Brown Corpus
 
@@ -297,13 +284,6 @@ word_freq = nltk.FreqDist(brown.words())
 # Get the most common 1000 words along with their frequency
 common_words = {k.lower(): v for k, v in word_freq.most_common(1000)}
 
-
-# for a,b in strange_words:
-#     print("{} is common?".format(a))
-#     print(is_common_word(a))
-#     print("{} is common?".format(b))
-#     print(is_common_word(b))
-
 def make_experiment(children_mode, filename):
     avg = 0
     with open(filename, "w+") as f:
@@ -313,7 +293,6 @@ def make_experiment(children_mode, filename):
             synset1 = wordnet.synset(w1)  # Replace with the first synset
             synset2 = wordnet.synset(w2)  # Replace with the second synset
         
-            # path = get_path_between_synsets(synset1, synset2)
             path, synsets = a_star(synset1, synset2, children_mode=children_mode)
             f.write("path" + str(path) + "\n")
             avg += len(path)

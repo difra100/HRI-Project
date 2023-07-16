@@ -10,10 +10,7 @@ def testDevice(source):
    if cap is None or not cap.isOpened():
        print('Warning: unable to open video source: ', source)
 
-testDevice(0) # no printout
-# testDevice(1) # prints message
-# testDevice(2) # prints message
-# testDevice(3) # prints message
+testDevice(0)
 
 
 def capture_image(filename):
@@ -23,13 +20,11 @@ def capture_image(filename):
     while True:
         # Capture frame-by-frame
         ret, frame = cap.read()
-        # print(frame)
 
         # Display the resulting frame
         cv2.imshow('Camera View', frame)
 
-        # Wait for 'q' key to exit
-        # if cv2.waitKey(1) & 0xFF == ord('q'):
+        
         break
 
     # Release the webcam

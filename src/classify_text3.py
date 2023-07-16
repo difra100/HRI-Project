@@ -10,7 +10,7 @@ import sys
 
 def calculate_similarity(text, labels):
     cossim = CosineSimilarity(dim=0, eps=1e-6)
-    torch_device = "cpu" #cuda" if torch.cuda.is_available() else "cpu"
+    torch_device = "cuda" if torch.cuda.is_available() else "cpu"
     model_id = 'openai/clip-vit-base-patch32'
 
     tokenizer = CLIPTokenizer.from_pretrained(model_id)
@@ -44,6 +44,4 @@ input_text = sys.argv[1]
 
 
 similarities = calculate_similarity(input_text, input_labels)
-# for label, similarity in zip(input_labels, similarities):
-#     print(f"{input_text} <-> {label}: {similarity:.4f}")
 print(list(zip(input_labels, similarities)))

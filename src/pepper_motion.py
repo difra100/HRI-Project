@@ -16,7 +16,7 @@ def point_at_object(motion):
 
     motion.angleInterpolation(names, keys, times, True)
 def pepperGreeting(robot):
-  # animazione del robot quando vince il gioco
+  # Robot's animation to greet people
   session = robot.service("ALMotion")
 
   isAbsolute = True
@@ -39,7 +39,7 @@ def pepperGreeting(robot):
   
   return
 def pepperTalk(robot, n_hands = 2):
-  # animazione del robot quando vince il gioco
+    # Robot's animation when talking to humans. n_hands could be one or two. It means those that are moved.
   session = robot.service("ALMotion")
 
   isAbsolute = True
@@ -66,7 +66,7 @@ def pepperTalk(robot, n_hands = 2):
      times.append(0.6)
 
 def pepperConfused(robot, n_hands = 2):
-  # animazione del robot quando vince il gioco
+  # Robot's animation when pepper has got wrong an answer or something else. It is also used to get engagement in the children.
   session = robot.service("ALMotion")
 
   isAbsolute = True
@@ -96,11 +96,6 @@ def pepperConfused(robot, n_hands = 2):
 
   session.angleInterpolation(jointNames, jointValues, times, isAbsolute)
 
-    # jointNames = ["RElbowYaw", "HipRoll", "HeadPitch", "LElbowYaw"]
-    # jointValues = [1.3, -0.07, -0.07]
-    # times  = [0.6, 0.6, 0.6]
-    # session.angleInterpolation(jointNames, jointValues, times, isAbsolute)
-  
   return
 
 def move_and_say(text, robot, service, configuration, motion):
@@ -138,7 +133,5 @@ if __name__ == '__main__':
     session = app.session
     
    
-    # ALMotion = session.service("ALMotion")
-    # pepperGreeting(session)
-    # point_at_object(ALMotion)
+
     pepperConfused(session, n_hands = 2)
