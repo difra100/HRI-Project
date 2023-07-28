@@ -46,3 +46,5 @@ The implementation of this project is divided in the following files and folders
 - Run `python full_interaction.py`
 
 If you want to use your own camera for taking pictures, `capture_image(filename)` must be uncommented in `full_interaction.py`, otherwise the existing files in the `images/` folder would be considered.
+# Final results
+A video of our final version is available at this ![link](https://www.youtube.com/watch?v=3uj1IQTXOUQ).
